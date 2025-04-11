@@ -1,0 +1,55 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import time
+
+# Set up
+driver = webdriver.Chrome()
+#driver.maximize_window()
+driver.get("https://www.saucedemo.com/v1/")
+
+
+# ---------- Test Case 1: Valid Login ----------
+def test_valid_login():
+    driver.find_element(By.ID, "user-name").send_keys("standard_user")
+    driver.find_element(By.ID, "password").send_keys("secret_sauce")
+    driver.find_element(By.ID, "login-button").click()
+
+    time.sleep(10)
+    assert "inventory.html" in driver.current_url
+    print("✅ Valid login test passed")
+
+    driver.get("https://www.saucedemo.com/v1/")  # go back to login page
+
+
+# ---------- Test Case 2: Invalid Login ----------
+def test_invalid_login():
+    driver.find_element(By.ID, "user-name").send_keys("wrong_user")
+    driver.find_element(By.ID, "password").send_keys("wrong_pass")
+    driver.find_element(By.ID, "login-button").click()
+
+    time.sleep(10)
+    error = driver.find_element(By.CSS_SELECTOR, "[data-test='error']").text
+    assert "Username and password do not match" in error or "Username and password do not match any user"
+    print("✅ Invalid login test passed")
+
+    driver.get("https://www.saucedemo.com/v1/")  # reset
+
+
+# ---------- Test Case 3: Empty Fields ----------
+def test_empty_login():
+    driver.find_element(By.ID, "login-button").click()
+
+    time.sleep(10)
+    error = driver.find_element(By.CSS_SELECTOR, "[data-test='error']").text
+    assert "Username is required" in error
+    print("✅ Empty fields login test passed")
+
+
+# Run the tests
+test_valid_login()
+test_invalid_login()
+test_empty_login()
+
+# Teardown
+driver.quit()
